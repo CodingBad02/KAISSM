@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/KAISSM/static/css/main.5c541214.css",
-    "main.js": "/KAISSM/static/js/main.49f3ec9f.js",
+    "main.css": "/KAISSM/static/css/main.db195344.css",
+    "main.js": "/KAISSM/static/js/main.32c6f3e5.js",
     "static/js/453.baaf6e3a.chunk.js": "/KAISSM/static/js/453.baaf6e3a.chunk.js",
     "index.html": "/KAISSM/index.html",
-    "main.5c541214.css.map": "/KAISSM/static/css/main.5c541214.css.map",
-    "main.49f3ec9f.js.map": "/KAISSM/static/js/main.49f3ec9f.js.map",
+    "main.db195344.css.map": "/KAISSM/static/css/main.db195344.css.map",
+    "main.32c6f3e5.js.map": "/KAISSM/static/js/main.32c6f3e5.js.map",
     "453.baaf6e3a.chunk.js.map": "/KAISSM/static/js/453.baaf6e3a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5c541214.css",
-    "static/js/main.49f3ec9f.js"
+    "static/css/main.db195344.css",
+    "static/js/main.32c6f3e5.js"
   ]
 }
