@@ -1,19 +1,35 @@
 // src/App.js
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
+import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import ContentCalendar from './components/calendar/ContentCalendar';
 import Analytics from './components/analytics/Analytics';
 import OAuthCallback from './pages/OAuthCallback';
+import Login from './pages/Login';
+import Profile from './pages/Profile';
 import { PostProvider } from './context/PostContext';
+import { AuthProvider, AuthContext } from './context/AuthContext';
 
-function App() {
+// Route guard for protected routes
+const ProtectedRoute = ({ children }) => {
+  const user = localStorage.getItem('currentUser');
+  
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+  
+  return children;
+};
+
+function AppContent() {
+  const { currentUser } = useContext(AuthContext);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
@@ -132,32 +148,60 @@ function App() {
   });
 
   return (
-    <PostProvider>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <Box sx={{ display: 'flex' }}>
-            {/* Header */}
-            <Header onMenuToggle={handleMenuToggle} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Box sx={{ display: 'flex' }}>
+          {/* Header */}
+          <Header onMenuToggle={handleMenuToggle} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 
-            {/* Sidebar */}
-            <Sidebar open={isSidebarOpen} onClose={handleMenuToggle} />
+          {/* Sidebar - Only show when user is logged in */}
+          {currentUser && <Sidebar open={isSidebarOpen} onClose={handleMenuToggle} />}
 
-            {/* Main Content Area */}
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-              <Toolbar />
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/calendar" element={<ContentCalendar events={sampleEvents} />} />
-                <Route path="/analytics" element={<Analytics data={sampleAnalyticsData} />} />
-                <Route path="/oauth/callback" element={<OAuthCallback />} />
-              </Routes>
-            </Box>
+          {/* Main Content Area */}
+          <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+            <Toolbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/calendar" element={
+                <ProtectedRoute>
+                  <ContentCalendar events={sampleEvents} />
+                </ProtectedRoute>
+              } />
+              <Route path="/analytics" element={
+                <ProtectedRoute>
+                  <Analytics data={sampleAnalyticsData} />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              {/* OAuth callback routes */}
+              <Route path="/oauth/callback" element={<OAuthCallback />} />
+              <Route path="/auth/callback" element={<OAuthCallback />} />
+            </Routes>
           </Box>
-        </Router>
-      </ThemeProvider>
-    </PostProvider>
+        </Box>
+      </Router>
+    </ThemeProvider>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <PostProvider>
+        <AppContent />
+      </PostProvider>
+    </AuthProvider>
   );
 }
 

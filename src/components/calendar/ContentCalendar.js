@@ -52,18 +52,37 @@ const ContentCalendar = () => {
   };
 
   const handleSavePost = (postData) => {
-    if (postData.id && posts.some(post => post.id === postData.id)) {
+    // Ensure dates are properly formatted as Date objects
+    const formattedPost = {
+      ...postData,
+      start: new Date(postData.start),
+      end: new Date(postData.end),
+    };
+
+    if (formattedPost.id && posts.some(post => post.id === formattedPost.id)) {
       // This is an existing post being updated
-      console.log("Updating post:", postData);
-      updatePost(postData);
+      console.log("Updating post:", formattedPost);
+      updatePost(formattedPost);
     } else {
       // This is a new post being added
-      console.log("Adding new post:", postData);
-      addPost(postData);
+      // Remove any temporary ID that might have been set and let addPost generate a proper one
+      console.log("Adding new post:", formattedPost);
+      
+      // Check if the post object contains all required properties
+      if (!formattedPost.title) {
+        console.error("Title is required for a post");
+        return;
+      }
+      
+      if (!formattedPost.platform) {
+        console.error("Platform is required for a post");
+        return;
+      }
+      
+      addPost(formattedPost);
     }
+    
     setShowModal(false);
-    // Add this for debugging
-    console.log("Current posts after save:", posts);
   };
 
   const handleDeletePost = (postId) => {

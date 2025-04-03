@@ -7,14 +7,40 @@ export const PostProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Load posts from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedPosts = localStorage.getItem('scheduledPosts');
+      if (savedPosts) {
+        setPosts(JSON.parse(savedPosts));
+      }
+    } catch (err) {
+      console.error('Error loading posts from localStorage:', err);
+    }
+  }, []);
+
+  // Save posts to localStorage whenever they change
+  useEffect(() => {
+    if (posts.length > 0) {
+      localStorage.setItem('scheduledPosts', JSON.stringify(posts));
+    }
+  }, [posts]);
+
   // Function to add a new post
   const addPost = (newPost) => {
-    setPosts([...posts, { ...newPost, id: Date.now().toString() }]);
+    const postWithId = { 
+      ...newPost, 
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      status: 'scheduled'
+    };
+    setPosts([...posts, postWithId]);
   };
 
   // Function to update an existing post
   const updatePost = (updatedPost) => {
-    setPosts(posts.map(post => post.id === updatedPost.id ? updatedPost : post));
+    setPosts(posts.map(post => post.id === updatedPost.id ? 
+      { ...updatedPost, updatedAt: new Date().toISOString() } : post));
   };
 
   // Function to delete a post

@@ -12,8 +12,8 @@ const PostModal = ({ event, onClose, onSave, slotInfo }) => {
     platform: 'instagram',
     content: '',
     media: '',
-    start: null,
-    end: null,
+    start: new Date(),
+    end: new Date(new Date().setHours(new Date().getHours() + 1)),
     mediaPreview: null
   });
 
@@ -22,22 +22,23 @@ const PostModal = ({ event, onClose, onSave, slotInfo }) => {
 
   useEffect(() => {
     if (event) {
+      // Editing existing event
       setPostData({
         id: event.id,
-        title: event.title,
-        platform: event.platform,
-        content: event.content,
-        media: event.media,
-        start: event.start,
-        end: event.end,
+        title: event.title || '',
+        platform: event.platform || 'instagram',
+        content: event.content || '',
+        media: event.media || '',
+        start: event.start ? new Date(event.start) : new Date(),
+        end: event.end ? new Date(event.end) : new Date(new Date().setHours(new Date().getHours() + 1)),
         mediaPreview: event.media
       });
     } else if (slotInfo) {
+      // Creating new event from selected slot
       setPostData({
         ...postData,
-        id: Date.now(), // Generate a temporary ID
-        start: slotInfo.start,
-        end: slotInfo.end
+        start: slotInfo.start ? new Date(slotInfo.start) : new Date(),
+        end: slotInfo.end ? new Date(slotInfo.end) : new Date(new Date().setHours(new Date().getHours() + 1))
       });
     }
   }, [event, slotInfo]);
@@ -59,11 +60,15 @@ const PostModal = ({ event, onClose, onSave, slotInfo }) => {
   };
 
   const handleDateChange = (date) => {
+    if (!date) return;
+    
     // Create a new date with the same time
     const newStart = new Date(date);
+    const currentStart = postData.start || new Date();
+    
     newStart.setHours(
-      postData.start ? postData.start.getHours() : new Date().getHours(),
-      postData.start ? postData.start.getMinutes() : new Date().getMinutes()
+      currentStart.getHours(),
+      currentStart.getMinutes()
     );
     
     // End time is 1 hour after start by default
@@ -78,7 +83,9 @@ const PostModal = ({ event, onClose, onSave, slotInfo }) => {
   };
 
   const handleTimeChange = (time) => {
-    const newStart = new Date(postData.start);
+    if (!time) return;
+    
+    const newStart = new Date(postData.start || new Date());
     newStart.setHours(time.getHours(), time.getMinutes());
     
     const newEnd = new Date(newStart);
@@ -121,11 +128,14 @@ const PostModal = ({ event, onClose, onSave, slotInfo }) => {
     const formattedPost = {
       ...postData,
       // If this is a new post and no ID was set, create one
-      id: postData.id || Date.now().toString(),
+      id: postData.id || `post-${Date.now()}`,
       // Make sure start and end dates are properly set
       start: postData.start || new Date(),
       end: postData.end || new Date(new Date().setHours(new Date().getHours() + 1))
     };
+    
+    // For debugging
+    console.log("Saving post:", formattedPost);
     
     onSave(formattedPost);
   };
